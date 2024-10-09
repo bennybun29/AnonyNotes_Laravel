@@ -57,18 +57,18 @@ class Users extends Authenticatable
     //relationship with the Notes model (User has many notes)
      public function notes()
      {
-         return $this->hasMany(Notes::class, 'user_name', 'user_name');
+         return $this->hasMany(Notes::class, 'user_id', 'user_id');
      }
  
      //relationship with the Comments model (User has many comments)
      public function comments()
      {
-         return $this->hasMany(Comments::class, 'user_name', 'user_name');
+         return $this->hasMany(Comments::class, 'user_id', 'user_id');
      }
  
      //relationship with the Hearts model (User can give many hearts)
      public function hearts()
      {
-         return $this->hasMany(Hearts::class, 'user_name', 'user_name');
+         return $this->hasMany(Hearts::class, 'user_id', 'user_id');
      }
 }

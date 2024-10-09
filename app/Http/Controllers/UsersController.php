@@ -39,14 +39,15 @@ class UsersController extends Controller
                 return response()->json([
                     'message' => 'User registered successfully',
                     'token' => $token,
-                    'user' => $user
+                    'user_id' => $user->user_id,  // Include user_id here
+                    'user' => $user,
+                    'created_at' => $user->created_at,
                 ], 201);
             }
 
             return response()->json([
                 'message' => 'Could not register the user, please try again later.',
             ], 500);
-
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'An error occurred while registering the user: ' . $e->getMessage(),
@@ -82,6 +83,8 @@ class UsersController extends Controller
             'message' => 'Login successful',
             'token' => $token,
             'username' => $user->user_name,
+            'user_id' => $user->user_id,  // Include user_id here
+            'created_at' => $user->created_at,
         ]);
     }
 
@@ -157,5 +160,20 @@ class UsersController extends Controller
         $user->delete();
 
         return response()->json(['message' => 'User deleted successfully']);
+    }
+    
+    public function getUserNotes($id)
+    {
+        // Find the user by ID
+        $user = Users::find($id);
+    
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+    
+        // Retrieve all notes for the user by user_id
+        $notes = $user->notes;
+    
+        return response()->json($notes);
     }
 }

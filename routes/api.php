@@ -11,6 +11,8 @@ use App\Http\Controllers\HeartsController;
 Route::post('register', [UsersController::class, 'register']); // Route for user registration
 Route::post('login', [UsersController::class, 'login']); // Route for user login
 Route::get('notes', [NotesController::class, 'index']);
+Route::get('/users/{id}/notes', [UsersController::class, 'getUserNotes']);
+
 
 
 

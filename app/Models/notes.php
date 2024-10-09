@@ -20,6 +20,7 @@ class Notes extends Model
         'content',
         'anonymous',
         'created_at',
+        'user_id'
     ];
     //Relationships with other tables
     
