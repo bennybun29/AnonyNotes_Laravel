@@ -145,6 +145,40 @@ class UsersController extends Controller
         return response()->json(['message' => 'User updated successfully']);
     }
 
+    public function changePassword(Request $request)
+    {
+        // Validate the request data
+        $validatedData = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+    
+        try {
+            // Get the currently authenticated user
+            $user = $request->user(); // Use Laravel's method to get the user based on token
+    
+            // Check if the current password matches the hashed password in the database
+            if (!Hash::check($validatedData['current_password'], $user->password)) {
+                return response()->json(['success' => false, 'message' => 'Current password is incorrect'], 400);
+            }
+    
+            // Update the user's password
+            $user->password = Hash::make($validatedData['new_password']);
+            $user->save();
+    
+            return response()->json(['success' => true, 'message' => 'Password changed successfully'], 200);
+    
+        } catch (\Exception $e) {
+            Log::error('Password change error: ', [
+                'request' => $request->all(),
+                'error' => $e->getMessage()
+            ]); // Log the error
+            return response()->json(['success' => false, 'error' => 'An error occurred.'], 500);
+        }
+    }
+    
+
+
     /**
      * Delete a specific user.
      */
@@ -176,4 +210,18 @@ class UsersController extends Controller
     
         return response()->json($notes);
     }
+
+        public function getUserBio($id)
+    {
+        // Find the user by ID
+        $user = Users::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        // Return the user's bio (assuming the bio column exists)
+        return response()->json(['bio' => $user->bio], 200);
+    }
+
 }

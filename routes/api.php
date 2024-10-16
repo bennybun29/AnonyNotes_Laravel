@@ -12,6 +12,12 @@ Route::post('register', [UsersController::class, 'register']); // Route for user
 Route::post('login', [UsersController::class, 'login']); // Route for user login
 Route::get('notes', [NotesController::class, 'index']);
 Route::get('/users/{id}/notes', [UsersController::class, 'getUserNotes']);
+Route::put('/user/{id}', [UsersController::class, 'update']);
+Route::get('/user/{id}/bio', [UsersController::class, 'getUserBio']);
+Route::post('change-password', [UsersController::class, 'changePassword'])->middleware('auth:sanctum');
+
+
+
 
 
 
