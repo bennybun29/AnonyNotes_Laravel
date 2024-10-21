@@ -19,8 +19,6 @@ Route::put('users/{id}', [UsersController::class, 'update']);// Route for updati
 Route::get('/users/{id}/bio', [UsersController::class, 'getUserBio']);// Route for retrieving a specific user's bio
 Route::get('/users/{id}/notes', [UsersController::class, 'getUserNotes']);// Route for retrieving all notes for a specific user
 
-
-
 //routes for notes CRUD
 Route::post('notes', [UsersController::class, 'store']); // Route for creating a new note
 Route::get('notes', [NotesController::class, 'index']);// Route for retrieving all notes
@@ -33,6 +31,8 @@ Route::get('comments', [CommentsController::class, 'index']);// Route for retrie
 Route::get('comments/{id}', [CommentsController::class, 'show']);// Route for retrieving a specific comment
 Route::delete('comments/{id}', [CommentsController::class, 'destroy']);// Route for deleting a specific comment
 Route::put('comments/{id}', [CommentsController::class, 'update']);// Route for updating a specific comment
+Route::get('comments/note/{id}', [CommentsController::class, 'getCommentsByNoteId']);// Route for retrieving all comments for a specific note
+Route::post('comments/note/{id}', [CommentsController::class, 'createCommentForNote']);// Route for creating a new comment
 
 //routes for hearts CRUD
 Route::get('hearts', [HeartsController::class, 'index']);// Route for retrieving all hearts
