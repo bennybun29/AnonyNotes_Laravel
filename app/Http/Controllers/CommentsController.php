@@ -43,7 +43,7 @@ public function createCommentForNote(Request $request, $note_id)
 {
     try {
         // Check if the note exists
-        $note = Note::find($note_id);
+        $note = Notes::find($note_id);
         if (!$note) {
             return response()->json(['message' => 'Note not found'], 404);
         }
@@ -56,7 +56,7 @@ public function createCommentForNote(Request $request, $note_id)
         ]);
 
         // Create the comment
-        $comment = Comment::create([
+        $comment = Comments::create([
             'note_id' => $note_id,
             'user_name' => $request->input('user_name'),
             'content' => $request->input('content'),
@@ -77,13 +77,13 @@ public function createCommentForNote(Request $request, $note_id)
     {
         try {
             // Check if the note exists
-            $note = Note::find($note_id);
+            $note = Notes::find($note_id);
             if (!$note) {
                 return response()->json(['message' => 'Note not found'], 404);
             }
 
             // Fetch all comments related to the note
-            $comments = Comment::where('note_id', $note_id)->get();
+            $comments = Comments::where('note_id', $note_id)->get();
 
             // Return the comments in a JSON response
             return response()->json($comments, 200);

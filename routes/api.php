@@ -31,8 +31,8 @@ Route::get('comments', [CommentsController::class, 'index']);// Route for retrie
 Route::get('comments/{id}', [CommentsController::class, 'show']);// Route for retrieving a specific comment
 Route::delete('comments/{id}', [CommentsController::class, 'destroy']);// Route for deleting a specific comment
 Route::put('comments/{id}', [CommentsController::class, 'update']);// Route for updating a specific comment
-Route::get('comments/note/{id}', [CommentsController::class, 'getCommentsByNoteId']);// Route for retrieving all comments for a specific note
-Route::post('comments/note/{id}', [CommentsController::class, 'createCommentForNote']);// Route for creating a new comment
+Route::get('/notes/{note_id}/comments', [CommentsController::class, 'getCommentsByNoteId']);// Route for retrieving all comments for a specific note
+Route::post('/notes/{note_id}/comments', [CommentsController::class, 'createCommentForNote']);// Route for creating a new comment
 
 //routes for hearts CRUD
 Route::get('hearts', [HeartsController::class, 'index']);// Route for retrieving all hearts
