@@ -23,18 +23,18 @@ class CommentsController extends Controller
      */
     public function store(Request $request)
     {
-        // Validates the incoming request data
-        $request->validate([
-            'note_id' => 'required|integer|exists:notes,note_id', // Ensures note_id exists in notes table
-            'user_name' => 'required|string|exists:users,user_name', // Ensures user_name exists in users table
-            'content' => 'required|string', // Ensures content is a string
-            'anonymous' => 'required|boolean', // Ensures anonymous is a boolean (true/false)
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'note_id' => 'required|integer|exists:notes,note_id',
+            'user_name' => 'required|string|exists:users,user_name',
+            'content' => 'required|string',
+            'anonymous' => 'required|boolean',
         ]);
 
-        // Creates a new comment using validated data
-        $comment = Comments::create($request->all());
+        // Create a new comment with validated data
+        $comment = Comments::create($validatedData);
 
-        // Returns the newly created comment with a 201 (created) status
+        // Return the newly created comment with a 201 status
         return response()->json($comment, 201);
     }
 

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Comments;
 use App\Models\Notes;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -18,38 +18,84 @@ class NotesController extends Controller
     return response()->json($notes);
 }
 
+// Function to fetch all comments for a specific note
+public function getCommentsByNoteId(int $noteId)
+{
+    // Check if the note exists
+    $note = Notes::find($noteId);
+    if ($note === null) {
+        return response()->json(['message' => 'Note not found'], 404);
+    }
+
+    // Fetch all comments related to the note
+    $comments = Comments::where('note_id', $noteId)->get();
+    if ($comments->isEmpty()) {
+        return response()->json(['message' => 'Comments not found'], 404);
+    }
+
+    // Return the comments in a JSON response
+    return response()->json($comments, 200);
+}
+
+// Function to create a comment for a specific note
+public function createCommentForNote(Request $request, int $noteId)
+{
+    // Validate the request data
+    $request->validate([
+        'content' => 'required|string',
+        'anonymous' => 'required|boolean',
+    ]);
+
+    // Retrieve the note by its ID
+    $note = Notes::find($noteId);
+
+    // Check if the note exists
+    if (!$note) {
+        return response()->json(['message' => 'Note not found'], 404);
+    }
+
+    // Create a new comment
+    $comment = new Comments();
+    $comment->note_id = $noteId;
+    $comment->user_name = $note->user_name; // Use the user_name from the note
+    $comment->content = $request->content;
+    $comment->anonymous = $request->anonymous;
+
+    // Save the comment
+    if ($comment->save()) {
+        return response()->json(['message' => 'Comment created successfully!'], 201);
+    }
+
+    return response()->json(['message' => 'Failed to create comment'], 500);
+}
+
+    /**
+     * Create a new note with the given data
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
 public function store(Request $request)
 {
     try {
-        // Log the request data
-        \Log::info('Request data: ', $request->all());
-
-        // Validate the incoming request
-        $request->validate([
+        $validatedData = $request->validate([
             'user_name' => 'required|string',
             'content' => 'required|string',
             'anonymous' => 'required|boolean',
-            'user_id' => 'required|integer|exists:users,user_id', // Ensure user_id is provided and exists
+            'user_id' => 'required|integer|exists:users,user_id',
         ]);
 
-        // Create a note with the provided data
-        $noteData = $request->only(['user_name', 'content', 'anonymous']);
-        $noteData['user_id'] = $request->user_id; // Assign user_id from request
+        $note = Notes::create($validatedData);
 
-        // Log the note data before creation
-        \Log::info('Note data before creation: ', $noteData);
-
-        // Create the note
-        $note = Notes::create($noteData);
-
-        return response()->json(['message' => "Note created successfully", 'note' => $note], 201);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        // Handle validation errors
-        \Log::error('Validation error: ', ['errors' => $e->errors()]);
+        return response()->json(['message' => 'Note created successfully', 'note' => $note], 201);
+    } catch (ValidationException $e) {
         return response()->json(['errors' => $e->errors()], 422);
-    } catch (\Exception $e) {
-        // Handle general errors
-        \Log::error('Error creating note: ', ['error' => $e->getMessage(), 'request_data' => $request->all()]);
+    } catch (Exception $e) {
+        Log::error('Error creating note', [
+            'error' => $e->getMessage(),
+            'request_data' => $request->all(),
+        ]);
+
         return response()->json(['error' => 'Unable to create note'], 500);
     }
 }
