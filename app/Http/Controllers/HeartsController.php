@@ -1,76 +1,102 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Comments;
+use App\Models\Notes;
 use App\Models\Hearts;
 use Illuminate\Http\Request;
 
 class HeartsController extends Controller
 {
-    /**
-     * Display a listing of the hearts.
-     */
-    public function index()
+    
+    
+    //Counts the number of hearts associated with a given note_id and returns the count 
+    public function countHeartsByNoteId($note_id)
     {
-        // Retrieves all hearts from the database
-        $hearts = Hearts::all();
+        // Count the number of hearts associated with the given note_id
+        $heartCount = Hearts::where('note_id', $note_id)->count();
 
-        return response()->json($hearts);
+        // Return the count of hearts
+        return response()->json(['note_id' => $note_id, 'heart_count' => $heartCount], 200);
     }
 
-    /**
-     * Store a newly created heart (like).
-     */
-    public function store(Request $request)
+    //Counts the number of hearts associated with a given comment_id and returns the count
+    public function countHeartsByCommentId($comment_id)
     {
-        // Validates the incoming request data
-        $request->validate([
-            'comment_id' => 'nullable|integer|exists:comments,comment_id', // If present, must exist in comments
-            'note_id' => 'nullable|integer|exists:notes,note_id', // If present, must exist in notes
-            'user_name' => 'required|string|exists:users,user_name', // Must reference an existing user
+        // Count the number of hearts associated with the given comment_id
+        $heartCount = Hearts::where('comment_id', $comment_id)->count();
+
+        // Return the count of hearts
+        return response()->json(['comment_id' => $comment_id, 'heart_count' => $heartCount], 200);
+    }
+
+    // Function to create a heart (like) for a specific note
+    public function createHeartForNote(Request $request, $note_id)
+    {
+        // Validate the request input
+        $validated = $request->validate([
+            'user_name' => 'required|exists:users,user_name', // Ensure the user exists
         ]);
 
-        // Creates a new heart using validated data
-        $heart = Hearts::create($request->all());
+        // Create a new heart
+        Hearts::create([
+            'note_id' => $note_id,
+            'user_name' => $validated['user_name'],
+            'created_at' => now(),
+        ]);
 
-        // Returns the newly created heart with a 201 (created) status
-        return response()->json($heart, 201);
+        return response()->json(['message' => 'Heart added to the note successfully!'], 201);
     }
 
-    /**
-     * Display the specified heart.
-     */
-    public function show($id)
+    // Function to create a heart (like) for a specific comment
+    public function createHeartForComment(Request $request, $comment_id)
     {
-        // Find the heart by its ID
-        $heart = Hearts::find($id);
+        // Validate the request input
+        $validated = $request->validate([
+            'user_name' => 'required|exists:users,user_name', // Ensure the user exists
+        ]);
 
-        // If the heart doesn't exist, return a 404 error
-        if (!$heart) {
-            return response()->json(['message' => 'Heart not found'], 404);
-        }
+        // Create a new heart
+        Hearts::create([
+            'comment_id' => $comment_id,
+            'user_name' => $validated['user_name'],
+            'created_at' => now(),
+        ]);
 
-        // Return the found heart as JSON
-        return response()->json($heart);
+        return response()->json(['message' => 'Heart added to the comment successfully!'], 201);
     }
-
-    /**
-     * Remove the specified heart (like).
-     */
-    public function destroy($id)
+    
+    // Function to remove a heart (unlike) for a specific note
+    public function removeHeartFromNote($note_id, $user_name)
     {
-        // Find the heart by ID
-        $heart = Hearts::find($id);
+        // Find and delete the heart by note_id and user_name
+        $heart = Hearts::where('note_id', $note_id)
+                    ->where('user_name', $user_name)
+                    ->first();
 
-        // If the heart doesn't exist, return a 404 error
-        if (!$heart) {
-            return response()->json(['message' => 'Heart not found'], 404);
+        if ($heart) {
+            $heart->delete();
+            return response()->json(['message' => 'Heart removed from the note successfully!'], 200);
+        } else {
+            return response()->json(['message' => 'Heart not found for this note.'], 404);
         }
-
-        // Delete the heart (like)
-        $heart->delete();
-
-        // Return a success message
-        return response()->json(['message' => 'Heart (like) removed successfully']);
     }
+
+    // Function to remove a heart (unlike) for a specific comment
+    public function removeHeartFromComment($comment_id, $user_name)
+    {
+        // Find and delete the heart by comment_id and user_name
+        $heart = Hearts::where('comment_id', $comment_id)
+                    ->where('user_name', $user_name)
+                    ->first();
+
+        if ($heart) {
+            $heart->delete();
+            return response()->json(['message' => 'Heart removed from the comment successfully!'], 200);
+        } else {
+            return response()->json(['message' => 'Heart not found for this comment.'], 404);
+        }
+    }
+
+
 }

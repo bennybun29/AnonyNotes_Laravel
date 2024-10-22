@@ -40,41 +40,40 @@ public function getCommentsByNoteId(int $noteId)
 // Function to create a comment for a specific note
 public function createCommentForNote(Request $request, int $noteId)
 {
-    // Validate the request data
-    $request->validate([
-        'content' => 'required|string',
-        'anonymous' => 'required|boolean',
-    ]);
+    try {
+        // Validate the request data
+        $validatedData = $request->validate([
+            'user_name' => 'required|string',
+            'content' => 'required|string',
+            'anonymous' => 'required|boolean',
+        ]);
 
-    // Retrieve the note by its ID
-    $note = Notes::find($noteId);
+        // Retrieve the note by its ID
+        $note = Notes::find($noteId);
 
-    // Check if the note exists
-    if (!$note) {
-        return response()->json(['message' => 'Note not found'], 404);
+        // Check if the note exists
+        if (!$note) {
+            return response()->json(['message' => 'Note not found'], 404);
+        }
+
+        // Create a new comment
+        $comment = Comments::create([
+            'note_id' => $noteId,
+            'user_name' => $validatedData['user_name'],
+            'content' => $validatedData['content'],
+            'anonymous' => $validatedData['anonymous'],
+        ]);
+
+        // Return the newly created comment with a 201 status
+        return response()->json(['message' => 'Comment created successfully!', 'comment' => $comment], 201);
+    } catch (ValidationException $e) {
+        return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'An error occurred while creating the comment'], 500);
     }
-
-    // Create a new comment
-    $comment = new Comments();
-    $comment->note_id = $noteId;
-    $comment->user_name = $note->user_name; // Use the user_name from the note
-    $comment->content = $request->content;
-    $comment->anonymous = $request->anonymous;
-
-    // Save the comment
-    if ($comment->save()) {
-        return response()->json(['message' => 'Comment created successfully!'], 201);
-    }
-
-    return response()->json(['message' => 'Failed to create comment'], 500);
 }
 
-    /**
-     * Create a new note with the given data
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
+// Function to create a new note
 public function store(Request $request)
 {
     try {
@@ -99,9 +98,7 @@ public function store(Request $request)
         return response()->json(['error' => 'Unable to create note'], 500);
     }
 }
-
-
-
+// Function to show a specific note
     public function show($id)
     {
         // Find and show a specific note by ID
@@ -114,6 +111,7 @@ public function store(Request $request)
         return response()->json($note);
     }
 
+    // Function to update a specific note
     public function update(Request $request, $id)
     {
         // Update the specified note
