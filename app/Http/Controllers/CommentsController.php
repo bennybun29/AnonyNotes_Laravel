@@ -38,62 +38,6 @@ class CommentsController extends Controller
         return response()->json($comment, 201);
     }
 
-// Function to create a comment for a specific note
-public function createCommentForNote(Request $request, $note_id)
-{
-    try {
-        // Check if the note exists
-        $note = Notes::find($note_id);
-        if (!$note) {
-            return response()->json(['message' => 'Note not found'], 404);
-        }
-
-        // Validate the incoming request data
-        $request->validate([
-            'user_name' => 'required|string|max:50',
-            'content' => 'required|string',
-            'anonymous' => 'required|boolean',
-        ]);
-
-        // Create the comment
-        $comment = Comments::create([
-            'note_id' => $note_id,
-            'user_name' => $request->input('user_name'),
-            'content' => $request->input('content'),
-            'anonymous' => $request->input('anonymous'),
-            'created_at' => now(),
-        ]);
-
-        // Return the created comment in a JSON response
-        return response()->json($comment, 201);
-    } catch (\Exception $e) {
-        return response()->json(['message' => 'An error occurred while creating the comment: ' . $e->getMessage()], 500);
-    }
-}
-
-
-    // Function to fetch all comments for a specific note
-    public function getCommentsByNoteId($note_id)
-    {
-        try {
-            // Check if the note exists
-            $note = Notes::find($note_id);
-            if (!$note) {
-                return response()->json(['message' => 'Note not found'], 404);
-            }
-
-            // Fetch all comments related to the note
-            $comments = Comments::where('note_id', $note_id)->get();
-
-            // Return the comments in a JSON response
-            return response()->json($comments, 200);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred while fetching comments: ' . $e->getMessage()], 500);
-        }
-    }
-
-    
-
     /**
      * Display the specified comment.
      */
